@@ -1,0 +1,10 @@
+{
+  "apiName": "api",
+  "api": {
+    "handler": "apiHandler"
+  },
+  "headers": {
+      "Content-Type": "text/plain;charset=utf-8",
+      "X-Clacks-Overhead": "GNU Terry Pratchett"
+    }
+}

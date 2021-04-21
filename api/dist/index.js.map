@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../lambda/index.ts", "../lambda/hello-world.ts"],
+  "sourcesContent": ["export { handler as helloWorldHandler } from \"./hello-world\";\n", "import { Handler } from \"aws-lambda\";\n\nexport const handler: Handler = async (event) => {\n  return {\n    body: `Ol\u00E1 mundo! O caminho \u00E9 \"${event.path}\"`,\n    headers: {\n      \"Content-Type\": \"text/plain;charset=utf-8\",\n    },\n    statusCode: 200,\n  };\n};\n"],
+  "mappings": ";;;;;;;;AAAA;AAAA;AAAA;AAAA;;;ACEO,IAAM,UAAmB,OAAO;AACrC,SAAO;AAAA,IACL,MAAM,iCAA2B,MAAM;AAAA,IACvC,SAAS;AAAA,MACP,gBAAgB;AAAA;AAAA,IAElB,YAAY;AAAA;AAAA;",
+  "names": []
+}

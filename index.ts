@@ -1,19 +1,19 @@
 import * as cdk from "@aws-cdk/core";
-import { RestApiStack } from "./rest-api";
+import { ApiStack } from "./api";
 import { buildSync } from "esbuild";
 import path from "path";
+import config from "./config.stack.json";
 
 buildSync({
   bundle: true,
-  entryPoints: [path.resolve(__dirname, "rest-api", "lambda", "index.ts")],
+  entryPoints: [path.resolve(__dirname, "api", "lambda", "index.ts")],
   external: ["aws-sdk"],
   format: "cjs",
-  outfile: path.join(__dirname, "rest-api", "dist", "index.js"),
+  outfile: path.join(__dirname, "api", "dist", "index.js"),
   platform: "node",
   sourcemap: true,
   target: "node14.2",
 });
 
 const app = new cdk.App();
-const idStack = "nexo-";
-new RestApiStack(app, `${idStack}rest-api`);
+new ApiStack(app, `${config.apiName}-stack`);

@@ -1,1 +1,1 @@
-export { handler as helloWorldHandler } from "./hello-world";
+export { handler as apiHandler } from "./api";

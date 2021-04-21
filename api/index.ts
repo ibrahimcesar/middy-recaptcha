@@ -2,9 +2,9 @@ import * as apigateway from "@aws-cdk/aws-apigateway";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as cdk from "@aws-cdk/core";
 import path from "path";
-import config from "../config.json";
+import config from "../config.stack.json";
 
-export class RestApiStack extends cdk.Stack {
+export class ApiStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string) {
     super(scope, id);
 

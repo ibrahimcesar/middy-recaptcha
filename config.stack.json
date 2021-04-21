@@ -1,7 +1,7 @@
 {
-  "apiName": "api",
+  "apiName": "middy",
   "api": {
-    "handler": "apiHandler"
+    "handler": "middyHandler"
   },
   "headers": {
       "Content-Type": "text/plain;charset=utf-8",

@@ -1,21 +1,10 @@
-# Primeiros passos
+ <div align="center">
+ 
+  <h1>🛵 🔐  reCAPTCHA v3 Middleware for Middy</h1>
 
-```bash
-npm i
-```
+<p>Developed in 🇧🇷 <span role="img" aria-label="Flag for Brazil">Brazil</p>
 
-O código das lambdas fica em `rest-api/lambda`
 
-# Deploy
+</div>
 
-Criando:
-
-```bash
-npx cdk deploy --app 'ts-node .'
-```
-
-Destruindo:
-
-```bash
-npx cdk destroy --app 'ts-node .'
-```
+# WIP

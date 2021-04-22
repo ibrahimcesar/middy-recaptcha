@@ -14,7 +14,6 @@
         "noImplicitAny": true,
         "noImplicitThis": true,
         "noImplicitReturns": true,
-        "noUncheckedIndexedAccess": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "resolveJsonModule": true,
@@ -32,9 +31,10 @@
     },
     "exclude": [
         "node_modules",
-        "demo"
+        "demo",
+        "backend"
     ],
     "include": [
-        "."
+        "lib"
     ]
 }

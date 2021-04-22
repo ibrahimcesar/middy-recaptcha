@@ -4,6 +4,8 @@ import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import typescript from "rollup-plugin-typescript2";
 import copy from 'rollup-plugin-copy'
 import banner2 from 'rollup-plugin-banner2'
+import json from "@rollup/plugin-json"
+import { terser }  from "rollup-plugin-terser"
 
 import packageJson from "./package.json";
 
@@ -16,7 +18,8 @@ const {
 } = packageJson;
 
 export default {
-  input: "./api/lib/index.tsx",
+  input: "./lib/index.ts",
+  external: [ 'https' ],
   output: [
     {
       file: packageJson.main,
@@ -30,8 +33,11 @@ export default {
       sourcemap: true,
     }
   ],
-  plugins: [peerDepsExternal(), resolve(), commonjs(), typescript(), banner2(() => `
-    /**
+  plugins: [peerDepsExternal(), resolve({preferBuiltins: false}), commonjs(), typescript(), terser({
+  output: {
+    comments: "all",
+  },
+}), json(), banner2(() => `/**
 * ${name} v${version}
 *  ${repository.url}
 *

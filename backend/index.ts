@@ -2,7 +2,7 @@ import * as cdk from "@aws-cdk/core";
 import { ApiStack } from "./api";
 import { buildSync } from "esbuild";
 import path from "path";
-import config from "./config.stack.json";
+import config from "../config.stack.json";
 
 buildSync({
   bundle: true,

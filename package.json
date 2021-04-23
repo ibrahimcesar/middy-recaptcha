@@ -1,6 +1,6 @@
 {
   "name": "middy-recaptcha",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Middy middleware",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ibrahimcesar/middy-recaptchav3-middleware.git"
+    "url": "https://github.com/ibrahimcesar/middy-recaptcha.git"
   },
   "author": {
     "name": "Ibrahim Cesar",
@@ -19,14 +19,15 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ibrahimcesar/middy-recaptchav3-middleware/issues"
+    "url": "https://github.com/ibrahimcesar/middy-recaptcha/issues"
   },
-  "homepage": "https://github.com/ibrahimcesar/middy-recaptchav3-middleware",
+  "homepage": "https://github.com/ibrahimcesar/middy-recaptcha",
   "keywords": [
     "Middy",
     "Lambda",
     "Middleware",
-    "reCaptchav3",
+    "CAPTCHA",
+    "reCAPTCHAv3",
     "Serverless Validations",
     "Security",
     "Lambda"

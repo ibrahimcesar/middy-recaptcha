@@ -3,7 +3,7 @@ import cors from "@middy/http-cors";
 import httpSecurityHeaders from "@middy/http-security-headers";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import AWS, { AWSError } from "aws-sdk";
-import reCAPTCHAv3 from "../lib/index";
+import recaptcha from "middy-recaptcha"
 
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 
@@ -42,7 +42,7 @@ handler
   .use(cors())
   .use(httpSecurityHeaders())
   .use(
-    reCAPTCHAv3({
+    reCAPTCHA({
       secret: "6Le3T7MaAAAAALUdnj_lMPQMUrS0cNbK96pVCEQc",
     })
   );

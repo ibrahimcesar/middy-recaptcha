@@ -37,7 +37,6 @@ async function post({ url, data, params }: IPost) {
 
   return new Promise((resolve, reject) => {
     const req = https.request(postUrl, options, (res) => {
-
       if (res?.statusCode! < 200 || (res && res?.statusCode! > 299)) {
         return reject(new Error(`HTTP status code ${res.statusCode}`));
       }
@@ -66,10 +65,10 @@ async function post({ url, data, params }: IPost) {
 
 const defaults = { threshold: 0.8, secret: "" };
 
-const reCAPTCHAv3 = ({ ...opts }: IReCaptcha) => {
+const reCAPTCHA = ({ ...opts }: IReCaptcha) => {
   const options = { ...defaults, ...opts };
 
-  const reCAPTCHAv3Before = async (request: any): Promise<any> => {
+  const reCAPTCHABefore = async (request: any): Promise<any> => {
     // @ts-ignore
     let verified = false;
     let score = 0;
@@ -129,14 +128,14 @@ const reCAPTCHAv3 = ({ ...opts }: IReCaptcha) => {
       };
     }
   };
-  const reCAPTCHAv3OnError = async (request: any) => {
+  const reCAPTCHAOnError = async (request: any) => {
     console.error(request);
   };
 
   return {
-    before: reCAPTCHAv3Before,
-    onError: reCAPTCHAv3OnError,
+    before: reCAPTCHABefore,
+    onError: reCAPTCHAOnError,
   };
 };
 
-export default reCAPTCHAv3;
+export default reCAPTCHA;

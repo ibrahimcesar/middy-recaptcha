@@ -1,5 +1,5 @@
 /**
-* middy-recaptcha v0.0.4
+* middy-recaptcha v0.0.6
 *  https://github.com/ibrahimcesar/middy-recaptchav3-middleware.git
 *
 *  Copyright (c) Ibrahim Cesar < email@ibrahimcesar.com > and project contributors.

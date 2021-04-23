@@ -32,7 +32,7 @@
     "exclude": [
         "node_modules",
         "demo",
-        "backend"
+        "backend",
     ],
     "include": [
         "lib"

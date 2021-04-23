@@ -73,11 +73,10 @@
 }
 
 .grid {
-  /* display: flex; */
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  /* max-width: 800px; */
   margin-top: 3rem;
 }
 
@@ -120,4 +119,40 @@
     width: 100%;
     flex-direction: column;
   }
+}
+
+.buttonSend {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+}
+
+.input {
+  width: 100%;
+}
+
+.tokenBlock {
+  color: #333;
+  background-color: #eaeaea;
+  border: 1px solid #000;
+  word-break: break-all;
+  max-width: 100%;
+  display: block;
+  margin-top: 10px;
+  padding: 5px;
+}
+
+.payloadBlock {
+  color: #333;
+  background-color: #eef59d;
+  border: 1px solid #000;
+  word-break: break-all;
+  max-width: 100%;
+  display: block;
+  margin-top: 10px;
+  padding: 5px;
+}
+
+.error {
+  color: tomato;
 }

@@ -1,147 +1,87 @@
 import Head from 'next/head'
-import { useEffect} from 'react'
+import { useEffect, useState } from 'react'
+import { useForm } from "react-hook-form";
 import Prism from "prismjs"
 
 import styles from '../styles/Home.module.css'
 
+type Inputs = {
+  messageRequired: string,
+};
+
+declare global {
+  interface Window {
+    grecaptcha: any
+  }
+}
+
+type Responses = null | string
+
 export default function Home() {
       useEffect(() => {
       Prism.highlightAll();
-    }, []);
+      }, []);
+  
+  const [submited, setSubmited] = useState(false);
+  const [tokenRecieved, setToken] = useState<Responses>(null);
+  const [payload, setPayload] = useState<Responses>(null);
+  
+  const { register, handleSubmit, formState: { errors } } = useForm<Inputs>();
+  const onSubmit = data => {
+        setSubmited(true)
+        window?.grecaptcha.ready(function() {
+          window?.grecaptcha.execute('6Le3T7MaAAAAALbGZHIpVCNxKEF_OqXfPENYkU_c', {action: 'submit'}).then(function(token) {
+            setToken(token)
+            console.log(data.messageRequired)
+            let payload = {
+              message: data.messageRequired,
+              token: token
+            }
+            setPayload(JSON.stringify(payload, null, 2))
+          });
+        });
+  };
 
   return (
     <div className={styles.container}>
       <Head>
         <title>reCAPTCHA v3 Middleware for Middy Demo Page</title>
         <link rel="icon" href="/favicon.png" />
+        <script src="https://www.google.com/recaptcha/api.js?render=6Le3T7MaAAAAALbGZHIpVCNxKEF_OqXfPENYkU_c"></script>
       </Head>
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          🛵🔐 reCAPTCHA v3 for Middy
+          🛵 🔐 reCAPTCHA Middleware for Middy
         </h1>
 
         <p className={styles.description}>
-          A private by default, faster and cleaner YouTube embed component for React applications
+          Middleware
         </p>
 
-        <div className={styles.grid}>
+        <section className={styles.grid}>
+          <div></div>
           <div>
-            <h2>The basic</h2>
-          <LiteYouTubeEmbed
-            id="HaEPXoXVf2k"
-            title="AWS re:Invent 2018: Amazon DynamoDB Deep Dive: Advanced Design Patterns for DynamoDB (DAT401)"
-            />
-            <pre>
-              <code className="language-jsx">
-                {`
-<LiteYouTubeEmbed
-  id="HaEPXoXVf2k"
-  title="Amazon DynamoDB Deep Dive"
-/>
-                  `
-                  }
-                </code>
-              </pre>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <input {...register("messageRequired", { required: true })} className={styles.input} />
+              {errors.messageRequired && <p className={styles.error}>This field is required</p>}
+              <input className={styles.buttonSend} type="submit" />
+              {submited ? (<span className={styles.tokenBlock}><b>Token Recieved</b>: {tokenRecieved}</span>) : null}
+              
+              {payload ? (<span className={styles.payloadBlock}><b>Payload Sent</b>: {payload}</span>): null}
+            </form>
           </div>
-
-                    <div>
-            <h2>The basic with maxresdefault</h2>
-          <LiteYouTubeEmbed
-            id="HaEPXoXVf2k"
-              title="AWS re:Invent 2018: Amazon DynamoDB Deep Dive: Advanced Design Patterns for DynamoDB (DAT401)"
-              cover="maxresdefault"
-            />
-            <pre>
-              <code className="language-jsx">
-                {`
-<LiteYouTubeEmbed
-  id="HaEPXoXVf2k"
-  title="Amazon DynamoDB Deep Dive"
-  poster="maxresdefault"
-/>
-                  `
-                  }
-                </code>
-              </pre>
-          </div>
-          <div>
-            <h2>The basic with mqdefault</h2>
-          <LiteYouTubeEmbed
-              id="HaEPXoXVf2k"
-              title="Amazon DynamoDB Deep Dive"
-              poster="mqdefault"
-            />
-            <pre>
-              <code className="language-jsx">
-                {`
-<LiteYouTubeEmbed
-  id="HaEPXoXVf2k"
-  title="Amazon DynamoDB Deep Dive"
-  poster="mqdefault"
-/>
-                  `
-                  }
-                </code>
-              </pre>
-          </div>
-          <div>
-          <h2>A playlist</h2>
-          <LiteYouTubeEmbed
-          id="PL0vfts4VzfNigohKr5sPrkcPFpuZmTe2C" // Default none, id of the video or playlist
-          playlist={true} // Use  true when your ID be from a playlist
-          playlistCoverId="Qhaz36TZG5Y"
-          poster="hqdefault"
-          title="Example of an embed playlist"
-            />
-                        <pre>
-              <code className="language-jsx">
-                {`
-<LiteYouTubeEmbed
-  id="PL0vfts4VzfNigohKr5sPrkcPFpuZmTe2C"
-  title="What’s new in Material Design for the web (Chrome Dev Summit 2019)"
-  playlist={true}
-  playlistCoverId="Qhaz36TZG5Y" // Choose an id from any video to be the cover
-  poster="hqdefault"
-/>
-                  `
-                  }
-                </code>
-              </pre>
-          </div>
-          <hr/>
-        <div>
-            <h2>Passing params like time and any other to the iFrame url</h2>
-          <LiteYouTubeEmbed
-            id="rdpReYuxI5M"
-            title="YouTube Embed"
-            poster="hqdefault"
-            params="start=1150"
-          />
-            <pre>
-              <code className="language-jsx">
-                {`
-<LiteYouTubeEmbed
-  id="L2vS_050c-M"
-  title="What’s new in Material Design for the web (Chrome Dev Summit 2019)"
-  params="start=1150"
-  poster="hqdefault"
-/>
-                  `
-                  }
-                </code>
-              </pre>
-          </div>
-        </div>
+          <div></div>
+        </section>
       </main>
 
       <footer className={styles.footer}>
         <a
-          href="https://github.com/ibrahimcesar/react-lite-youtube-embed"
+          href="https://github.com/ibrahimcesar/middy-recaptcha"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Demo for  <span role="img" aria-label="TV" style={{marginLeft: "5px", marginRight: "5px"}}> 📺 </span> React Lite YouTube Embed
+          Demo for  <span role="img" aria-label="motor scooter" style={{marginLeft: "5px", marginRight: "5px"}}> 🛵</span><span role="img" aria-label="lock and key" style={{marginLeft: "5px", marginRight: "5px"}}> 🔐</span> reCAPTCHA Middleware for Middy
           
         </a>
       </footer>

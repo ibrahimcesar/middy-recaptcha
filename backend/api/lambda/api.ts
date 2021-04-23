@@ -3,7 +3,7 @@ import cors from "@middy/http-cors";
 import httpSecurityHeaders from "@middy/http-security-headers";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import AWS, { AWSError } from "aws-sdk";
-import recaptcha from "middy-recaptcha"
+import reCAPTCHA from "middy-recaptcha"
 
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 

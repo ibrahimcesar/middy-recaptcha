@@ -4,7 +4,7 @@ import * as lambda from "@aws-cdk/aws-lambda";
 import * as cdk from "@aws-cdk/core";
 import * as iam from "@aws-cdk/aws-iam";
 import path from "path";
-import config from "../../config.stack.json";
+import config from "../config.stack.json";
 
 export class ApiStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string) {

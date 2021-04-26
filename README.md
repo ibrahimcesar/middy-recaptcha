@@ -151,7 +151,10 @@ export { handler };
 With `secret`you can load your secret key from an `.env` file or env parameters for your Lambda or hardcode the value. But, off course, none of us will ever do this kind of reckless nonsense.
 
  <div align="center">
-![Wink](https://media.giphy.com/media/6ra84Uso2hoir3YCgb/giphy.gif)
+ 
+ ![Wink](https://media.giphy.com/media/6ra84Uso2hoir3YCgb/giphy.gif)
+ 
+ 
 </div>
 
 ## Options

@@ -13,7 +13,7 @@ export class ApiStack extends cdk.Stack {
     const handler = new lambda.Function(this, "handler", {
       code: new lambda.AssetCode(path.resolve(__dirname, "dist")),
       handler: `index.${config.api.handler}`,
-      runtime: lambda.Runtime.NODEJS_14_X,
+      runtime: lambda.Runtime.NODEJS_12_X,
       description: "An lambda to accept our submissions",
       tracing: lambda.Tracing.ACTIVE,
     });
@@ -51,9 +51,9 @@ export class ApiStack extends cdk.Stack {
 
     const statement = new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
-      actions: ["secretsmanager:GetSecretValue"],
+      actions: ["ssm:GetParameters"],
       resources: [
-        "arn:aws:secretsmanager:us-east-1:695841149075:secret:/dev/recaptchav3/*",
+        `arn:aws:ssm:${config.awsAccountRegion}:${config.awsAccountId}:parameter/dev/recaptcha/secret`,
       ],
     });
 

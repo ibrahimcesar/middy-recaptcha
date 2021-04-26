@@ -3,44 +3,47 @@ import querystring from "querystring";
 
 interface IReCaptcha {
   threshold?: number;
-  secret: string;
+  secret?: string;
   useIP?: boolean;
 }
 
 interface IPost {
   url: string;
-  data?: object;
   params: {
     secret: string;
     response: string;
-    ip?: string;
+    remoteip?: string;
   };
 }
 
-async function post({ url, data, params }: IPost) {
-  const dataString = JSON.stringify(data);
-  let postUrl = url;
+interface Params {
+  secret: string;
+  response: string;
+  remoteip?: string;
+}
 
-  if (params) {
-    let searchparams = querystring.stringify(params);
-    postUrl = `${url}&${searchparams}`;
-  }
+interface recaptchaResponse {
+  success: boolean;
+  challenge_ts?: string;
+  hostname?: string;
+  score?: number;
+  action?: string;
+}
+
+async function post({ url, params }: IPost) {
+  const content = querystring.stringify(params);
 
   const options = {
     method: "POST",
+    body: content,
     headers: {
-      "Content-Type": "application/json",
-      "Content-Length": dataString.length,
+      "Content-Type": "application/x-www-form-urlencoded",
     },
     timeout: 1000,
   };
 
   return new Promise((resolve, reject) => {
-    const req = https.request(postUrl, options, (res) => {
-      if (res?.statusCode! < 200 || (res && res?.statusCode! > 299)) {
-        return reject(new Error(`HTTP status code ${res.statusCode}`));
-      }
-
+    const req = https.request(url, options, (res) => {
       const body: any[] = [];
       res.on("data", (chunk) => body.push(chunk));
       res.on("end", () => {
@@ -58,78 +61,92 @@ async function post({ url, data, params }: IPost) {
       reject(new Error("Request time out"));
     });
 
-    req.write(dataString);
+    req.write(content);
     req.end();
   });
 }
 
-const defaults = { threshold: 0.8, secret: "" };
+const defaults = { threshold: 0.8, secret: "", useIp: false };
 
 const reCAPTCHA = ({ ...opts }: IReCaptcha) => {
   const options = { ...defaults, ...opts };
 
   const reCAPTCHABefore = async (request: any): Promise<any> => {
-    // @ts-ignore
-    let verified = false;
-    let score = 0;
-    let ipSource = "";
-
-    const secret = options.secret;
-    const token = request.event?.body?.token;
-    const remoteIP = request.event?.requestContext?.identity?.sourceIp;
-
-    console.log("Secret: ", options.secret);
-
-    if (options.secret.length && request.event?.body?.token) {
-      verified = false;
-    } else {
-      await post({
-        url: "https://www.google.com.br/recaptcha/api/siteverify",
-        data: {},
-        params: {
-          secret: secret,
-          response: token,
-          ip: opts.useIP ? remoteIP : null,
-        },
-      })
-        .then((response: any) => {
-          if (response.status === 200) {
-            if (response.data.success) {
-              if (response.data.score >= options.threshold) {
-                verified = true;
-                score = response.data.score;
-                options.useIP
-                  ? (ipSource =
-                      request.event?.requestContext?.identity?.sourceIp)
-                  : null;
-              }
-            }
-          }
-        })
-        .catch((error: Error) => {
-          console.error(error);
-        });
-    }
-
-    request.event = {
-      ...request.event,
-      state: {
-        verified: true,
-        reCaptcha: {
-          score: score,
-          ip: ipSource,
-        },
-      },
+    let result: recaptchaResponse = {
+      success: false,
+      challenge_ts: new Date().toISOString(),
     };
 
-    if (!request.event.state.ok) {
-      return {
-        statusCode: 401,
-      };
-    }
+    const secret = options.secret.length
+      ? options.secret
+      : request.context.recaptchaSecret;
+    const token = request.event.body.token;
+    const remoteIP = request.event.headers["x-forwarded-for"];
+
+    const paramsToSend: Params = {
+      secret: secret,
+      response: token,
+    };
+
+    if (opts.useIP) paramsToSend.remoteip = remoteIP;
+
+    await post({
+      url: "https://www.google.com/recaptcha/api/siteverify",
+      params: {
+        ...paramsToSend,
+      },
+    })
+      .then((res: any) => {
+        let response = JSON.parse(res);
+        console.info("reCAPTCHA: ", res);
+        if (response.success) {
+          if (response.score >= options.threshold) {
+            result = {
+              success: response.success,
+              challenge_ts: response.challenge_ts,
+              hostname: response.hostname,
+              score: response.score,
+              action: response.action,
+            };
+            request.context = {
+              ...request.context,
+              reCAPTCHA: result,
+            };
+          }
+          return {
+            statusCode: 401,
+            statusText: "Not Authorized",
+          };
+        }
+        return {
+          statusCode: 403,
+          statusText: "Forbidden",
+        };
+      })
+      .catch((error: Error) => {
+        console.error(error);
+        return {
+          statusCode: 500,
+          statusText: "Internal Server Error",
+        };
+      })
+      .finally(() => {
+        delete request.event.body.token;
+
+        if (!result.success) {
+          return {
+            statusCode: 401,
+            statusText: "Not Authorized",
+          };
+        } else return;
+      });
   };
   const reCAPTCHAOnError = async (request: any) => {
     console.error(request);
+    return {
+      statusCode: 500,
+      statusText: "Internal Server Error",
+    };
   };
 
   return {

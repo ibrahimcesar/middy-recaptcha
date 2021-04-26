@@ -31,7 +31,7 @@ var __toModule = (module2) => {
 // node_modules/@middy/core/index.js
 var require_core = __commonJS((exports2, module2) => {
   "use strict";
-  var middy2 = (handler2 = () => {
+  var middy2 = (baseHandler2 = () => {
   }, plugin) => {
     var _plugin$beforePrefetc;
     plugin === null || plugin === void 0 ? void 0 : (_plugin$beforePrefetc = plugin.beforePrefetch) === null || _plugin$beforePrefetc === void 0 ? void 0 : _plugin$beforePrefetc.call(plugin);
@@ -48,57 +48,25 @@ var require_core = __commonJS((exports2, module2) => {
         error: void 0,
         internal: {}
       };
-      const middyPromise = async () => {
-        try {
-          await runMiddlewares(beforeMiddlewares, request, plugin);
-          if (request.response === void 0) {
-            var _plugin$beforeHandler, _plugin$afterHandler;
-            plugin === null || plugin === void 0 ? void 0 : (_plugin$beforeHandler = plugin.beforeHandler) === null || _plugin$beforeHandler === void 0 ? void 0 : _plugin$beforeHandler.call(plugin);
-            request.response = await handler2(request.event, request.context);
-            plugin === null || plugin === void 0 ? void 0 : (_plugin$afterHandler = plugin.afterHandler) === null || _plugin$afterHandler === void 0 ? void 0 : _plugin$afterHandler.call(plugin);
-            await runMiddlewares(afterMiddlewares, request, plugin);
-          }
-        } catch (e) {
-          request.response = void 0;
-          request.error = e;
-          try {
-            await runMiddlewares(onErrorMiddlewares, request, plugin);
-            if (request.response === void 0) {
-              throw request.error;
-            }
-          } catch (e2) {
-            e2.originalError = request.error;
-            request.error = e2;
-            throw request.error;
-          }
-        } finally {
-          var _plugin$requestEnd;
-          await (plugin === null || plugin === void 0 ? void 0 : (_plugin$requestEnd = plugin.requestEnd) === null || _plugin$requestEnd === void 0 ? void 0 : _plugin$requestEnd.call(plugin));
-        }
-        return request.response;
-      };
-      return middyPromise();
+      return runRequest(request, [...beforeMiddlewares], baseHandler2, [...afterMiddlewares], [...onErrorMiddlewares], plugin);
     };
     instance.use = (middlewares) => {
       if (Array.isArray(middlewares)) {
-        middlewares.forEach((middleware) => instance.applyMiddleware(middleware));
+        for (const middleware of middlewares) {
+          instance.applyMiddleware(middleware);
+        }
         return instance;
-      } else if (typeof middlewares === "object") {
-        return instance.applyMiddleware(middlewares);
       }
-      throw new Error("Middy.use() accepts an object or an array of objects");
+      return instance.applyMiddleware(middlewares);
     };
     instance.applyMiddleware = (middleware) => {
-      if (typeof middleware !== "object") {
-        throw new Error("Middleware must be an object");
-      }
       const {
         before,
         after,
         onError
       } = middleware;
       if (!before && !after && !onError) {
-        throw new Error('Middleware must contain at least one key among "before", "after", "onError"');
+        throw new Error('Middleware must be an object containing at least one key among "before", "after", "onError"');
       }
       if (before)
         instance.before(before);
@@ -127,20 +95,45 @@ var require_core = __commonJS((exports2, module2) => {
     };
     return instance;
   };
-  var runMiddlewares = async (middlewares, request, plugin) => {
-    var _plugin$beforeMiddlew, _plugin$afterMiddlewa;
-    const stack = Array.from(middlewares);
-    if (!stack.length)
-      return;
-    const nextMiddleware = stack.shift();
-    plugin === null || plugin === void 0 ? void 0 : (_plugin$beforeMiddlew = plugin.beforeMiddleware) === null || _plugin$beforeMiddlew === void 0 ? void 0 : _plugin$beforeMiddlew.call(plugin, nextMiddleware === null || nextMiddleware === void 0 ? void 0 : nextMiddleware.name);
-    const res = await (nextMiddleware === null || nextMiddleware === void 0 ? void 0 : nextMiddleware(request));
-    plugin === null || plugin === void 0 ? void 0 : (_plugin$afterMiddlewa = plugin.afterMiddleware) === null || _plugin$afterMiddlewa === void 0 ? void 0 : _plugin$afterMiddlewa.call(plugin, nextMiddleware === null || nextMiddleware === void 0 ? void 0 : nextMiddleware.name);
-    if (res !== void 0) {
-      request.response = res;
-      return;
+  var runRequest = async (request, beforeMiddlewares, baseHandler2, afterMiddlewares, onErrorMiddlewares, plugin) => {
+    try {
+      await runMiddlewares(request, beforeMiddlewares, plugin);
+      if (request.response === void 0) {
+        var _plugin$beforeHandler, _plugin$afterHandler;
+        plugin === null || plugin === void 0 ? void 0 : (_plugin$beforeHandler = plugin.beforeHandler) === null || _plugin$beforeHandler === void 0 ? void 0 : _plugin$beforeHandler.call(plugin);
+        request.response = await baseHandler2(request.event, request.context);
+        plugin === null || plugin === void 0 ? void 0 : (_plugin$afterHandler = plugin.afterHandler) === null || _plugin$afterHandler === void 0 ? void 0 : _plugin$afterHandler.call(plugin);
+        await runMiddlewares(request, afterMiddlewares, plugin);
+      }
+    } catch (e) {
+      request.response = void 0;
+      request.error = e;
+      try {
+        await runMiddlewares(request, onErrorMiddlewares, plugin);
+        if (request.response === void 0)
+          throw request.error;
+      } catch (e2) {
+        e2.originalError = request.error;
+        request.error = e2;
+        throw request.error;
+      }
+    } finally {
+      var _plugin$requestEnd;
+      await (plugin === null || plugin === void 0 ? void 0 : (_plugin$requestEnd = plugin.requestEnd) === null || _plugin$requestEnd === void 0 ? void 0 : _plugin$requestEnd.call(plugin));
     }
-    return runMiddlewares(stack, request, plugin);
+    return request.response;
+  };
+  var runMiddlewares = async (request, middlewares, plugin) => {
+    for (const nextMiddleware of middlewares) {
+      var _plugin$beforeMiddlew, _plugin$afterMiddlewa;
+      plugin === null || plugin === void 0 ? void 0 : (_plugin$beforeMiddlew = plugin.beforeMiddleware) === null || _plugin$beforeMiddlew === void 0 ? void 0 : _plugin$beforeMiddlew.call(plugin, nextMiddleware === null || nextMiddleware === void 0 ? void 0 : nextMiddleware.name);
+      const res = await (nextMiddleware === null || nextMiddleware === void 0 ? void 0 : nextMiddleware(request));
+      plugin === null || plugin === void 0 ? void 0 : (_plugin$afterMiddlewa = plugin.afterMiddleware) === null || _plugin$afterMiddlewa === void 0 ? void 0 : _plugin$afterMiddlewa.call(plugin, nextMiddleware === null || nextMiddleware === void 0 ? void 0 : nextMiddleware.name);
+      if (res !== void 0) {
+        request.response = res;
+        return;
+      }
+    }
   };
   module2.exports = middy2;
 });
@@ -264,21 +257,27 @@ var require_util = __commonJS((exports2, module2) => {
     }
   };
   var jsonSafeParse = (string, reviver) => {
+    if (typeof string !== "string")
+      return string;
+    const firstChar = string[0];
+    if (firstChar !== "{" && firstChar !== "[" && firstChar !== '"')
+      return string;
     try {
       return JSON.parse(string, reviver);
     } catch (e) {
     }
     return string;
   };
-  var normalizeHttpResponse = (response, fallbackResponse = {}) => {
-    var _response, _response$headers, _response2;
-    response = (_response = response) !== null && _response !== void 0 ? _response : fallbackResponse;
-    if (Array.isArray(response) || typeof response !== "object") {
+  var normalizeHttpResponse = (response) => {
+    var _response$headers, _response;
+    if (response === void 0) {
+      response = {};
+    } else if (Array.isArray(response) || typeof response !== "object" || response === null) {
       response = {
         body: response
       };
     }
-    response.headers = (_response$headers = (_response2 = response) === null || _response2 === void 0 ? void 0 : _response2.headers) !== null && _response$headers !== void 0 ? _response$headers : {};
+    response.headers = (_response$headers = (_response = response) === null || _response === void 0 ? void 0 : _response.headers) !== null && _response$headers !== void 0 ? _response$headers : {};
     return response;
   };
   module2.exports = {
@@ -1342,7 +1341,9 @@ var require_http_errors = __commonJS((exports2, module2) => {
 var require_http_json_body_parser = __commonJS((exports2, module2) => {
   "use strict";
   var mimePattern = /^application\/(.+\+)?json(;.*)?$/;
-  var defaults = {};
+  var defaults = {
+    reviver: void 0
+  };
   var httpJsonBodyParserMiddleware = (opts = {}) => {
     const options = {
       ...defaults,
@@ -1379,27 +1380,138 @@ var require_dist = __commonJS((exports2, module2) => {
     return e2 && typeof e2 == "object" && "default" in e2 ? e2 : {default: e2};
   }
   var t = e(require("https"));
-  function n(e2, t2) {
+  var n = function() {
+    return (n = Object.assign || function(e2) {
+      for (var t2, n2 = 1, r2 = arguments.length; n2 < r2; n2++)
+        for (var o2 in t2 = arguments[n2])
+          Object.prototype.hasOwnProperty.call(t2, o2) && (e2[o2] = t2[o2]);
+      return e2;
+    }).apply(this, arguments);
+  };
+  /*! *****************************************************************************
+  Copyright (c) Microsoft Corporation.
+  
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted.
+  
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+  REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+  AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+  INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+  LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+  OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+  PERFORMANCE OF THIS SOFTWARE.
+  ***************************************************************************** */
+  function r(e2, t2, n2, r2) {
+    return new (n2 || (n2 = Promise))(function(o2, u2) {
+      function c2(e3) {
+        try {
+          s2(r2.next(e3));
+        } catch (e4) {
+          u2(e4);
+        }
+      }
+      function a2(e3) {
+        try {
+          s2(r2.throw(e3));
+        } catch (e4) {
+          u2(e4);
+        }
+      }
+      function s2(e3) {
+        var t3;
+        e3.done ? o2(e3.value) : (t3 = e3.value, t3 instanceof n2 ? t3 : new n2(function(e4) {
+          e4(t3);
+        })).then(c2, a2);
+      }
+      s2((r2 = r2.apply(e2, t2 || [])).next());
+    });
+  }
+  function o(e2, t2) {
+    var n2, r2, o2, u2, c2 = {label: 0, sent: function() {
+      if (1 & o2[0])
+        throw o2[1];
+      return o2[1];
+    }, trys: [], ops: []};
+    return u2 = {next: a2(0), throw: a2(1), return: a2(2)}, typeof Symbol == "function" && (u2[Symbol.iterator] = function() {
+      return this;
+    }), u2;
+    function a2(u3) {
+      return function(a3) {
+        return function(u4) {
+          if (n2)
+            throw new TypeError("Generator is already executing.");
+          for (; c2; )
+            try {
+              if (n2 = 1, r2 && (o2 = 2 & u4[0] ? r2.return : u4[0] ? r2.throw || ((o2 = r2.return) && o2.call(r2), 0) : r2.next) && !(o2 = o2.call(r2, u4[1])).done)
+                return o2;
+              switch (r2 = 0, o2 && (u4 = [2 & u4[0], o2.value]), u4[0]) {
+                case 0:
+                case 1:
+                  o2 = u4;
+                  break;
+                case 4:
+                  return c2.label++, {value: u4[1], done: false};
+                case 5:
+                  c2.label++, r2 = u4[1], u4 = [0];
+                  continue;
+                case 7:
+                  u4 = c2.ops.pop(), c2.trys.pop();
+                  continue;
+                default:
+                  if (!(o2 = c2.trys, (o2 = o2.length > 0 && o2[o2.length - 1]) || u4[0] !== 6 && u4[0] !== 2)) {
+                    c2 = 0;
+                    continue;
+                  }
+                  if (u4[0] === 3 && (!o2 || u4[1] > o2[0] && u4[1] < o2[3])) {
+                    c2.label = u4[1];
+                    break;
+                  }
+                  if (u4[0] === 6 && c2.label < o2[1]) {
+                    c2.label = o2[1], o2 = u4;
+                    break;
+                  }
+                  if (o2 && c2.label < o2[2]) {
+                    c2.label = o2[2], c2.ops.push(u4);
+                    break;
+                  }
+                  o2[2] && c2.ops.pop(), c2.trys.pop();
+                  continue;
+              }
+              u4 = t2.call(e2, c2);
+            } catch (e3) {
+              u4 = [6, e3], r2 = 0;
+            } finally {
+              n2 = o2 = 0;
+            }
+          if (5 & u4[0])
+            throw u4[1];
+          return {value: u4[0] ? u4[1] : void 0, done: true};
+        }([u3, a3]);
+      };
+    }
+  }
+  function u(e2, t2) {
     return Object.prototype.hasOwnProperty.call(e2, t2);
   }
-  var r = function(e2, t2, r2, o2) {
-    t2 = t2 || "&", r2 = r2 || "=";
-    var s2 = {};
+  var c = function(e2, t2, n2, r2) {
+    t2 = t2 || "&", n2 = n2 || "=";
+    var o2 = {};
     if (typeof e2 != "string" || e2.length === 0)
-      return s2;
-    var a2 = /\+/g;
+      return o2;
+    var c2 = /\+/g;
     e2 = e2.split(t2);
-    var c2 = 1e3;
-    o2 && typeof o2.maxKeys == "number" && (c2 = o2.maxKeys);
-    var u = e2.length;
-    c2 > 0 && u > c2 && (u = c2);
-    for (var i = 0; i < u; ++i) {
-      var d, p, f, l, y = e2[i].replace(a2, "%20"), m = y.indexOf(r2);
-      m >= 0 ? (d = y.substr(0, m), p = y.substr(m + 1)) : (d = y, p = ""), f = decodeURIComponent(d), l = decodeURIComponent(p), n(s2, f) ? Array.isArray(s2[f]) ? s2[f].push(l) : s2[f] = [s2[f], l] : s2[f] = l;
+    var a2 = 1e3;
+    r2 && typeof r2.maxKeys == "number" && (a2 = r2.maxKeys);
+    var s2 = e2.length;
+    a2 > 0 && s2 > a2 && (s2 = a2);
+    for (var i2 = 0; i2 < s2; ++i2) {
+      var f2, l2, p, d, h = e2[i2].replace(c2, "%20"), y = h.indexOf(n2);
+      y >= 0 ? (f2 = h.substr(0, y), l2 = h.substr(y + 1)) : (f2 = h, l2 = ""), p = decodeURIComponent(f2), d = decodeURIComponent(l2), u(o2, p) ? Array.isArray(o2[p]) ? o2[p].push(d) : o2[p] = [o2[p], d] : o2[p] = d;
     }
-    return s2;
+    return o2;
   };
-  var o = function(e2) {
+  var a = function(e2) {
     switch (typeof e2) {
       case "string":
         return e2;
@@ -1413,58 +1525,218 @@ var require_dist = __commonJS((exports2, module2) => {
   };
   var s = function(e2, t2, n2, r2) {
     return t2 = t2 || "&", n2 = n2 || "=", e2 === null && (e2 = void 0), typeof e2 == "object" ? Object.keys(e2).map(function(r3) {
-      var s2 = encodeURIComponent(o(r3)) + n2;
+      var o2 = encodeURIComponent(a(r3)) + n2;
       return Array.isArray(e2[r3]) ? e2[r3].map(function(e3) {
-        return s2 + encodeURIComponent(o(e3));
-      }).join(t2) : s2 + encodeURIComponent(o(e2[r3]));
-    }).join(t2) : r2 ? encodeURIComponent(o(r2)) + n2 + encodeURIComponent(o(e2)) : "";
+        return o2 + encodeURIComponent(a(e3));
+      }).join(t2) : o2 + encodeURIComponent(a(e2[r3]));
+    }).join(t2) : r2 ? encodeURIComponent(a(r2)) + n2 + encodeURIComponent(a(e2)) : "";
   };
-  var a = function(e2) {
+  var i = function(e2) {
     var t2 = {exports: {}};
     return e2(t2, t2.exports), t2.exports;
   }(function(e2, t2) {
-    t2.decode = t2.parse = r, t2.encode = t2.stringify = s;
+    t2.decode = t2.parse = c, t2.encode = t2.stringify = s;
   });
-  var c = {threshold: 0.8, secret: ""};
-  module2.exports = ({...e2}) => {
-    const n2 = {...c, ...e2};
-    return {before: async (r2) => {
-      let o2 = 0, s2 = "";
-      const c2 = n2.secret, u = r2.event?.body?.token, i = r2.event?.requestContext?.identity?.sourceIp;
-      if (console.log("Secret: ", n2.secret), n2.secret.length && r2.event?.body?.token || await async function({url: e3, data: n3, params: r3}) {
-        const o3 = JSON.stringify(n3);
-        let s3 = e3;
-        if (r3) {
-          let t2 = a.stringify(r3);
-          s3 = `${e3}&${t2}`;
-        }
-        const c3 = {method: "POST", headers: {"Content-Type": "application/json", "Content-Length": o3.length}, timeout: 1e3};
-        return new Promise((e4, n4) => {
-          const r4 = t.default.request(s3, c3, (t2) => {
-            if (t2?.statusCode < 200 || t2 && t2?.statusCode > 299)
-              return n4(new Error(`HTTP status code ${t2.statusCode}`));
-            const r5 = [];
-            t2.on("data", (e5) => r5.push(e5)), t2.on("end", () => {
-              const t3 = Buffer.concat(r5).toString();
-              e4(t3);
+  function f(e2) {
+    var n2 = e2.url, u2 = e2.params;
+    return r(this, void 0, void 0, function() {
+      var e3, r2;
+      return o(this, function(o2) {
+        return e3 = i.stringify(u2), r2 = {method: "POST", body: e3, headers: {"Content-Type": "application/x-www-form-urlencoded"}, timeout: 1e3}, [2, new Promise(function(o3, u3) {
+          var c2 = t.default.request(n2, r2, function(e4) {
+            var t2 = [];
+            e4.on("data", function(e5) {
+              return t2.push(e5);
+            }), e4.on("end", function() {
+              var e5 = Buffer.concat(t2).toString();
+              o3(e5);
             });
           });
-          r4.on("error", (e5) => {
-            n4(e5);
-          }), r4.on("timeout", () => {
-            r4.destroy(), n4(new Error("Request time out"));
-          }), r4.write(o3), r4.end();
+          c2.on("error", function(e4) {
+            u3(e4);
+          }), c2.on("timeout", function() {
+            c2.destroy(), u3(new Error("Request time out"));
+          }), c2.write(e3), c2.end();
+        })];
+      });
+    });
+  }
+  var l = {threshold: 0.8, secret: "", useIp: false};
+  module2.exports = function(e2) {
+    var t2 = function(e3, t3) {
+      var n2 = {};
+      for (var r2 in e3)
+        Object.prototype.hasOwnProperty.call(e3, r2) && t3.indexOf(r2) < 0 && (n2[r2] = e3[r2]);
+      if (e3 != null && typeof Object.getOwnPropertySymbols == "function") {
+        var o2 = 0;
+        for (r2 = Object.getOwnPropertySymbols(e3); o2 < r2.length; o2++)
+          t3.indexOf(r2[o2]) < 0 && Object.prototype.propertyIsEnumerable.call(e3, r2[o2]) && (n2[r2[o2]] = e3[r2[o2]]);
+      }
+      return n2;
+    }(e2, []), u2 = n(n({}, l), t2);
+    return {before: function(e3) {
+      return r(void 0, void 0, void 0, function() {
+        var r2, c2, a2, s2, i2;
+        return o(this, function(o2) {
+          switch (o2.label) {
+            case 0:
+              return r2 = {success: false, challenge_ts: new Date().toISOString()}, c2 = u2.secret.length ? u2.secret : e3.context.recaptchaSecret, a2 = e3.event.body.token, s2 = e3.event.headers["x-forwarded-for"], i2 = {secret: c2, response: a2}, t2.useIP && (i2.remoteip = s2), [4, f({url: "https://www.google.com/recaptcha/api/siteverify", params: n({}, i2)}).then(function(t3) {
+                var o3 = JSON.parse(t3);
+                return console.info("reCAPTCHA: ", t3), o3.success ? (o3.score >= u2.threshold && (r2 = {success: o3.success, challenge_ts: o3.challenge_ts, hostname: o3.hostname, score: o3.score, action: o3.action}, e3.context = n(n({}, e3.context), {reCAPTCHA: r2})), {statusCode: 401, statusText: "Not Authorized"}) : {statusCode: 403, statusText: "Forbidden"};
+              }).catch(function(e4) {
+                return console.error(e4), {statusCode: 500, statusText: "Internal Server Error"};
+              }).finally(function() {
+                return delete e3.event.body.token, r2.success ? void 0 : {statusCode: 401, statusText: "Not Authorized"};
+              })];
+            case 1:
+              return o2.sent(), [2];
+          }
         });
-      }({url: "https://www.google.com.br/recaptcha/api/siteverify", data: {}, params: {secret: c2, response: u, ip: e2.useIP ? i : null}}).then((e3) => {
-        e3.status === 200 && e3.data.success && e3.data.score >= n2.threshold && (o2 = e3.data.score, n2.useIP && (s2 = r2.event?.requestContext?.identity?.sourceIp));
-      }).catch((e3) => {
-        console.error(e3);
-      }), r2.event = {...r2.event, state: {verified: true, reCaptcha: {score: o2, ip: s2}}}, !r2.event.state.ok)
-        return {statusCode: 401};
-    }, onError: async (e3) => {
-      console.error(e3);
+      });
+    }, onError: function(e3) {
+      return r(void 0, void 0, void 0, function() {
+        return o(this, function(t3) {
+          return console.error(e3), [2, {statusCode: 500, statusText: "Internal Server Error"}];
+        });
+      });
     }};
   };
+});
+
+// node_modules/@middy/ssm/index.js
+var require_ssm = __commonJS((exports2, module2) => {
+  "use strict";
+  var {
+    canPrefetch,
+    createPrefetchClient,
+    createClient,
+    processCache,
+    jsonSafeParse,
+    getInternal,
+    sanitizeKey
+  } = require_util();
+  var SSM = require("aws-sdk/clients/ssm.js");
+  var awsRequestLimit = 10;
+  var defaults = {
+    AwsClient: SSM,
+    awsClientOptions: {},
+    awsClientAssumeRole: void 0,
+    awsClientCapture: void 0,
+    fetchData: {},
+    disablePrefetch: false,
+    cacheKey: "ssm",
+    cacheExpiry: -1,
+    setToEnv: false,
+    setToContext: false
+  };
+  var ssmMiddleware = (opts = {}) => {
+    const options = {
+      ...defaults,
+      ...opts
+    };
+    const fetch = () => {
+      return {
+        ...fetchSingle(),
+        ...fetchByPath()
+      };
+    };
+    const fetchSingle = () => {
+      const values = {};
+      let request = null;
+      let batch = [];
+      const internalKeys = Object.keys(options.fetchData);
+      const fetchKeys = Object.values(options.fetchData);
+      for (const [idx, fetchKey] of fetchKeys.entries()) {
+        if (fetchKey.substr(-1) === "/")
+          continue;
+        batch.push(fetchKey);
+        if ((!idx || (idx + 1) % awsRequestLimit !== 0) && !(idx + 1 === internalKeys.length)) {
+          continue;
+        }
+        request = client.getParameters({
+          Names: batch,
+          WithDecryption: true
+        }).promise().then((resp) => {
+          var _resp$InvalidParamete;
+          if ((_resp$InvalidParamete = resp.InvalidParameters) !== null && _resp$InvalidParamete !== void 0 && _resp$InvalidParamete.length) {
+            throw new Error(`InvalidParameters present: ${resp.InvalidParameters.join(", ")}`);
+          }
+          return Object.assign(...resp.Parameters.map((param) => {
+            return {
+              [param.Name]: parseValue(param)
+            };
+          }));
+        });
+        for (const fetchKey2 of batch) {
+          const internalKey = internalKeys[fetchKeys.indexOf(fetchKey2)];
+          values[internalKey] = request.then((params) => params[fetchKey2]);
+        }
+        batch = [];
+        request = null;
+      }
+      return values;
+    };
+    const fetchByPath = () => {
+      const values = {};
+      for (const internalKey in options.fetchData) {
+        const fetchKey = options.fetchData[internalKey];
+        if (fetchKey.substr(-1) !== "/")
+          continue;
+        values[internalKey] = fetchPath(fetchKey);
+      }
+      return values;
+    };
+    const fetchPath = (path, nextToken, values = {}) => {
+      return client.getParametersByPath({
+        Path: path,
+        NextToken: nextToken,
+        Recursive: true,
+        WithDecryption: true
+      }).promise().then((resp) => {
+        Object.assign(values, ...resp.Parameters.map((param) => {
+          return {
+            [sanitizeKey(param.Name.replace(path, ""))]: parseValue(param)
+          };
+        }));
+        if (resp.NextToken)
+          return fetchPath(path, resp.NextToken, values);
+        return values;
+      });
+    };
+    const parseValue = (param) => {
+      if (param.Type === "StringList") {
+        return param.Value.split(",");
+      }
+      return jsonSafeParse(param.Value);
+    };
+    let prefetch, client;
+    if (canPrefetch(options)) {
+      client = createPrefetchClient(options);
+      prefetch = processCache(options, fetch);
+    }
+    const ssmMiddlewareBefore = async (request) => {
+      var _prefetch;
+      if (!client) {
+        client = await createClient(options, request);
+      }
+      const {
+        value
+      } = (_prefetch = prefetch) !== null && _prefetch !== void 0 ? _prefetch : processCache(options, fetch, request);
+      Object.assign(request.internal, value);
+      if (options.setToContext || options.setToEnv) {
+        const data = await getInternal(Object.keys(options.fetchData), request);
+        if (options.setToEnv)
+          Object.assign(process.env, data);
+        if (options.setToContext)
+          Object.assign(request.context, data);
+      }
+      prefetch = null;
+    };
+    return {
+      before: ssmMiddlewareBefore
+    };
+  };
+  module2.exports = ssmMiddleware;
 });
 
 // api/lambda/index.ts
@@ -1478,30 +1750,31 @@ var import_core = __toModule(require_core());
 var import_http_cors = __toModule(require_http_cors());
 var import_http_security_headers = __toModule(require_http_security_headers());
 var import_http_json_body_parser = __toModule(require_http_json_body_parser());
-var import_aws_sdk = __toModule(require("aws-sdk"));
 var import_middy_recaptcha = __toModule(require_dist());
-var ssm = new import_aws_sdk.default.SecretsManager({
-  region: "us-east-1"
-});
-async function baseHandler(event) {
+var import_ssm = __toModule(require_ssm());
+async function baseHandler(_event, context) {
+  var _a, _b, _c, _d;
+  const ctx = context;
+  const message = {
+    data: {
+      message: "Hello from the other Side!",
+      success: (_a = ctx == null ? void 0 : ctx.reCAPTCHA) == null ? void 0 : _a.success,
+      score: ctx == null ? void 0 : ctx.reCAPTCHA.score,
+      challenge_ts: (_b = ctx == null ? void 0 : ctx.reCAPTCHA) == null ? void 0 : _b.challenge_ts,
+      hostname: (_c = ctx == null ? void 0 : ctx.reCAPTCHA) == null ? void 0 : _c.hostname,
+      action: (_d = ctx == null ? void 0 : ctx.reCAPTCHA) == null ? void 0 : _d.action
+    }
+  };
   return {
     statusCode: 200,
-    body: JSON.stringify(event, null, 2)
+    body: JSON.stringify(message, null, 2)
   };
 }
-var ssmSecret = "";
-ssm.getSecretValue({SecretId: "/dev/recaptchav3/secret_key"}, (error, data) => {
-  if (error) {
-    console.error(error);
-  }
-  console.info(JSON.stringify(data, null, 2));
-  if ("SecretString" in data) {
-    let retrieved = JSON.parse(data.SecretString);
-    ssmSecret = retrieved["/dev/recaptchav3/secret_key"];
-  }
-});
 var handler = (0, import_core.default)(baseHandler);
-handler.use((0, import_http_json_body_parser.default)()).use((0, import_http_cors.default)()).use((0, import_http_security_headers.default)()).use((0, import_middy_recaptcha.default)({
-  secret: "6Le3T7MaAAAAALUdnj_lMPQMUrS0cNbK96pVCEQc"
-}));
+handler.use((0, import_ssm.default)({
+  fetchData: {
+    recaptchaSecret: "/dev/recaptcha/secret"
+  },
+  setToContext: true
+})).use((0, import_http_json_body_parser.default)()).use((0, import_http_cors.default)()).use((0, import_http_security_headers.default)()).use((0, import_middy_recaptcha.default)());
 //# sourceMappingURL=index.js.map

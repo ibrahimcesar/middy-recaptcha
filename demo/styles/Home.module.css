@@ -78,6 +78,7 @@
   align-items: center;
   justify-content: center;
   margin-top: 3rem;
+  font-size: 1rem;
 }
 
 .card {
@@ -129,6 +130,16 @@
 
 .input {
   width: 100%;
+  font-size: 1rem;
+}
+
+.grid input[type="submit"] {
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.grid button {
+  text-transform: uppercase;
 }
 
 .tokenBlock {
@@ -142,9 +153,42 @@
   padding: 5px;
 }
 
+.fakeTokenBlock {
+  color: #fff;
+  background-color: #ff0303;
+  border: 1px solid #000;
+  word-break: break-all;
+  max-width: 100%;
+  display: block;
+  margin-top: 10px;
+  padding: 5px;
+}
+
 .payloadBlock {
   color: #333;
   background-color: #eef59d;
+  border: 1px solid #000;
+  word-break: break-all;
+  max-width: 100%;
+  display: block;
+  margin-top: 10px;
+  padding: 5px;
+}
+
+.responseBlock {
+  color: #333;
+  background-color: #aef7ff;
+  border: 1px solid #000;
+  word-break: break-all;
+  max-width: 100%;
+  display: block;
+  margin-top: 10px;
+  padding: 5px;
+}
+
+.responseWrongBlock {
+  color: #fff;
+  background-color: #d23613;
   border: 1px solid #000;
   word-break: break-all;
   max-width: 100%;

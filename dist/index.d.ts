@@ -1,6 +1,6 @@
 interface IReCaptcha {
   threshold?: number;
-  secret: string;
+  secret?: string;
   useIP?: boolean;
 }
 export default function reCAPTCHAv3(opts: IReCaptcha);

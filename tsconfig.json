@@ -6,7 +6,7 @@
         "forceConsistentCasingInFileNames": true,
         "inlineSourceMap": true,
         "lib": [
-            "es2020"
+            "ES2020"
         ],
         "moduleResolution": "node",
         "noEmitOnError": true,

@@ -1,12 +1,13 @@
 {
   "name": "middy-recaptcha",
-  "version": "0.0.6",
-  "description": "Middy middleware",
+  "version": "0.1.0",
+  "description": "reCAPTCHA validation Middy middleware for yours AWS Lambdas",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "npx rollup -c"
+    "build": "npx rollup -c",
+    "pub": "npx rollup -c && npm publish"
   },
   "repository": {
     "type": "git",

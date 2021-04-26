@@ -150,7 +150,8 @@ export { handler };
 
 With `secret`you can load your secret key from an `.env` file or env parameters for your Lambda or hardcode the value. But, off course, none of us will ever do this kind of reckless nonsense.
 
-![Wink](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ckoju76elxbu9k9o0gda.gif)
+![Wink](https://media.giphy.com/media/6ra84Uso2hoir3YCgb/giphy.gif)
+
 ## Options
 
 | Prop   |      Type      |  Description |

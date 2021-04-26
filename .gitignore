@@ -2,4 +2,3 @@ node_modules
 cdk.out
 .vscode
 tpm
-tpm/*

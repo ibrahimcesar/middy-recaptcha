@@ -5,8 +5,8 @@
 
   [![TypeScript](https://badges.frapsoft.com/typescript/code/typescript.svg?v=101)](https://github.com/ellerbrock/typescript-badges/)
   
-[![Version](https://img.shields.io/npm/v/react-lite-youtube-embed?label=latest%20version)](https://www.npmjs.com/package/middy-recaptcha
-)&nbsp; &nbsp;[![License](https://badgen.net/github/Þlicense/ibrahimcesar/middy-recaptcha)](./LICENSE)&nbsp; &nbsp;![GitHub issues by-label](https://img.shields.io/github/issues/ibrahimcesar/middy-recaptcha/bug)
+[![Version](https://img.shields.io/npm/v/middy-recaptcha?label=latest%20version)](https://www.npmjs.com/package/middy-recaptcha
+)&nbsp; &nbsp;[![License](https://badgen.net/github/license/ibrahimcesar/middy-recaptcha)](./LICENSE)&nbsp; &nbsp;![GitHub issues by-label](https://img.shields.io/github/issues/ibrahimcesar/middy-recaptcha/bug)
 
 <p>Developed in 🇧🇷 <span role="img" aria-label="Flag for Brazil">Brazil</p>
 

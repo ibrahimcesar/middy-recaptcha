@@ -16,18 +16,6 @@
 
 [Middy](https://middy.js.org/) is a very simple middleware engine that allows you to simplify your AWS Lambda code when using Node.js. As I always had to implement and reimplement this type of logic, I decide to wrap up and give back tcommunity middleware for that validates a reCAPTCHA token in the body of a `POST` request.
 
-### What is Middy
-
-From the [docs]((https://github.com/middyjs/middy#what-is-middy)):
-
-
-
-If you have used web frameworks like Express, then you will be familiar with the concepts adopted in Middy and you will be able to get started very quickly.
-
-A middleware engine allows you to focus on the strict business logic of your Lambda and then attach additional common elements like authentication, authorization, validation, serialization, etc. in a modular and reusable way by decorating the main business logic.
-
-------
-
 If you are using Middy and have some public facing API chances are you'll need more security. This simple middleware will validate the token from [reCAPTCHA v3](https://developers.google.com/recaptcha/docs/v3).
 
 ## 🚀 Install

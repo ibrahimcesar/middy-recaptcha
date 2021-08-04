@@ -66,6 +66,13 @@ async function post({ url, params }: IPost) {
   });
 }
 
+function checkIfNumeric (num: any) {
+  if (!['number', 'string'].includes(typeof num)) {
+    return false;
+  }
+  return `${num}` === Number(num).toString();
+}
+
 const defaults = { threshold: 0.8, secret: "", useIp: false };
 
 const reCAPTCHA = ({ ...opts }: IReCaptcha) => {
@@ -80,6 +87,7 @@ const reCAPTCHA = ({ ...opts }: IReCaptcha) => {
     const secret = options.secret.length
       ? options.secret
       : request.context.recaptchaSecret;
+    const threshold = checkIfNumeric(request.context.recaptchaThreshold) ? Number(request.context.recaptchaThreshold) : options.threshold;
     const token = request.event.body.token;
     const remoteIP = request.event.headers["x-forwarded-for"];
 
@@ -100,7 +108,7 @@ const reCAPTCHA = ({ ...opts }: IReCaptcha) => {
         let response = JSON.parse(res);
         console.info("reCAPTCHA: ", res);
         if (response.success) {
-          if (response.score >= options.threshold) {
+          if (response.score >= threshold) {
             result = {
               success: response.success,
               challenge_ts: response.challenge_ts,

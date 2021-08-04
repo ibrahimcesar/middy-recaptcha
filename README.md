@@ -107,7 +107,9 @@ handler
   .use(
     ssm({
       fetchData: {
+        // the keys (`recaptchaSecret` and `recaptchaThreshold`) are the keys picked up in `context` by `reCAPTCHA()`, if specified
         recaptchaSecret: "/dev/recaptcha/secret",
+        recaptchaThreshold: "/dev/recaptcha/threshold", // defaults to 0.8 if not specified
       },
       setToContext: true,
     })
@@ -150,7 +152,7 @@ With `secret`you can load your secret key from an `.env` file or env parameters 
 | Prop   |      Type      |  Description |
 |----------|:--------:|------------|
 | **secret** | string | Secret key from the reCAPTCHA admin. Highly recommend to use System Setting Manager.|
-| threshold | number | Default: `0.8`  reCAPTCHA v3 returns a score (1.0 is very likely a good interaction, 0.0 is very likely a bot). Based on the score, you can take variable action in the context of your site.  |
+| threshold | number | Default: `0.8`  reCAPTCHA v3 returns a score (1.0 is very likely a good interaction, 0.0 is very likely a bot). Based on the score, you can take variable action in the context of your site. (Supports System Setting Manager via context)  |
 | useIp | boolean |    Default `false` Optional. The user's IP address. |
 
 ### TODO

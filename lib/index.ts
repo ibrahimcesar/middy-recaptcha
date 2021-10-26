@@ -5,6 +5,7 @@ interface IReCaptcha {
   threshold?: number;
   secret?: string;
   useIP?: boolean;
+  tokenField?: string;
 }
 
 interface IPost {
@@ -66,14 +67,19 @@ async function post({ url, params }: IPost) {
   });
 }
 
-function checkIfNumeric (num: any) {
-  if (!['number', 'string'].includes(typeof num)) {
+function checkIfNumeric(num: any) {
+  if (!["number", "string"].includes(typeof num)) {
     return false;
   }
   return `${num}` === Number(num).toString();
 }
 
-const defaults = { threshold: 0.8, secret: "", useIp: false };
+const defaults = {
+  threshold: 0.8,
+  secret: "",
+  useIp: false,
+  tokenField: "token",
+};
 
 const reCAPTCHA = ({ ...opts }: IReCaptcha) => {
   const options = { ...defaults, ...opts };
@@ -87,8 +93,10 @@ const reCAPTCHA = ({ ...opts }: IReCaptcha) => {
     const secret = options.secret.length
       ? options.secret
       : request.context.recaptchaSecret;
-    const threshold = checkIfNumeric(request.context.recaptchaThreshold) ? Number(request.context.recaptchaThreshold) : options.threshold;
-    const token = request.event.body.token;
+    const threshold = checkIfNumeric(request.context.recaptchaThreshold)
+      ? Number(request.context.recaptchaThreshold)
+      : options.threshold;
+    const token = request.event.body[options.tokenField];
     const remoteIP = request.event.headers["x-forwarded-for"];
 
     const paramsToSend: Params = {
@@ -139,7 +147,7 @@ const reCAPTCHA = ({ ...opts }: IReCaptcha) => {
         };
       })
       .finally(() => {
-        delete request.event.body.token;
+        delete request.event.body[options.tokenField];
 
         if (!result.success) {
           return {

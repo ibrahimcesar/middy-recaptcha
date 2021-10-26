@@ -153,7 +153,8 @@ With `secret`you can load your secret key from an `.env` file or env parameters 
 |----------|:--------:|------------|
 | **secret** | string | Secret key from the reCAPTCHA admin. Highly recommend to use System Setting Manager.|
 | threshold | number | Default: `0.8`  reCAPTCHA v3 returns a score (1.0 is very likely a good interaction, 0.0 is very likely a bot). Based on the score, you can take variable action in the context of your site. (Supports System Setting Manager via context)  |
-| useIp | boolean |    Default `false` Optional. The user's IP address. |
+| useIp | boolean |    Default: `false` Optional. The user's IP address. |
+| tokenField | string | Default: `token`. The field on the `event.body` that has the reCaptcha token from your Frontend application. |
 
 ### TODO
 - Improve docs. I want to do a write-up about the backend and frontend integration soon.

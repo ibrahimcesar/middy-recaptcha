@@ -1,6 +1,6 @@
 {
   "name": "middy-recaptcha",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "reCAPTCHA validation Middy middleware for yours AWS Lambdas",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
